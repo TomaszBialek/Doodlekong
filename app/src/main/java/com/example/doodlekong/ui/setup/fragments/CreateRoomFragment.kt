@@ -3,11 +3,12 @@ package com.example.doodlekong.ui.setup.fragments
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import com.example.doodlekong.R
 import com.example.doodlekong.databinding.FragmentCreateRoomBinding
 import com.example.doodlekong.databinding.FragmentSelectRoomBinding
 import com.example.doodlekong.databinding.FragmentUsernameBinding
 
-class CreateRoomFragment: Fragment() {
+class CreateRoomFragment: Fragment(R.layout.fragment_create_room) {
 
     private var _binding: FragmentCreateRoomBinding? = null
     private val binding: FragmentCreateRoomBinding
