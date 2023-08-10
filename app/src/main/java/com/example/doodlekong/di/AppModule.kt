@@ -1,17 +1,29 @@
 package com.example.doodlekong.di
 
+import android.app.Application
 import android.content.Context
 import com.example.doodlekong.data.remote.api.SetupApi
+import com.example.doodlekong.data.remote.ws.CustomGsonMessageAdapter
+import com.example.doodlekong.data.remote.ws.DrawingApi
+import com.example.doodlekong.data.remote.ws.FlowStreamAdapter
 import com.example.doodlekong.repository.DefaultSetupRepository
 import com.example.doodlekong.repository.DefaultSetupRepository_Factory
 import com.example.doodlekong.repository.SetupRepository
 import com.example.doodlekong.util.Constants.HTTP_BASE_URL
 import com.example.doodlekong.util.Constants.HTTP_BASE_URL_LOCALHOST
+import com.example.doodlekong.util.Constants.RECONNECT_INTERVAL
 import com.example.doodlekong.util.Constants.USE_LOCALHOST
+import com.example.doodlekong.util.Constants.WS_BASE_URL
+import com.example.doodlekong.util.Constants.WS_BASE_URL_LOCALHOST
 import com.example.doodlekong.util.DispatcherProvider
 import com.example.doodlekong.util.clientId
 import com.example.doodlekong.util.dataStore
 import com.google.gson.Gson
+import com.tinder.scarlet.Scarlet
+import com.tinder.scarlet.lifecycle.android.AndroidLifecycle
+import com.tinder.scarlet.retry.BackoffStrategy
+import com.tinder.scarlet.retry.LinearBackoffStrategy
+import com.tinder.scarlet.websocket.okhttp.newWebSocketFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -63,6 +75,25 @@ object AppModule {
         return runBlocking {
             context.dataStore.clientId()
         }
+    }
+
+    @Singleton
+    @Provides
+    fun provideDrawingApi(
+        app: Application,
+        okHttpClient: OkHttpClient,
+        gson: Gson
+    ): DrawingApi {
+        return Scarlet.Builder()
+            .backoffStrategy(LinearBackoffStrategy(RECONNECT_INTERVAL))
+            .lifecycle(AndroidLifecycle.ofApplicationForeground(app))
+            .webSocketFactory(okHttpClient.newWebSocketFactory(
+                if (USE_LOCALHOST) WS_BASE_URL_LOCALHOST else WS_BASE_URL
+            ))
+            .addStreamAdapterFactory(FlowStreamAdapter.Factory)
+            .addMessageAdapterFactory(CustomGsonMessageAdapter.Factory(gson))
+            .build()
+            .create()
     }
 
     @Singleton
