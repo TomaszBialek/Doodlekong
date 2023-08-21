@@ -25,6 +25,7 @@ import com.example.doodlekong.data.remote.ws.models.GameError
 import com.example.doodlekong.data.remote.ws.models.JoinRoomHandshake
 import com.example.doodlekong.databinding.ActivityDrawingBinding
 import com.example.doodlekong.util.Constants
+import com.example.doodlekong.util.hideKeyboard
 import com.google.android.material.snackbar.Snackbar
 import com.tinder.scarlet.WebSocket
 import dagger.hilt.android.AndroidEntryPoint
@@ -98,6 +99,7 @@ class DrawingActivity: AppCompatActivity() {
                 ChatMessage(args.username, args.roomName, binding.etMessage.text.toString(), System.currentTimeMillis())
             )
             binding.etMessage.text?.clear()
+            hideKeyboard(binding.root)
         }
 
         binding.ibUndo.setOnClickListener {
