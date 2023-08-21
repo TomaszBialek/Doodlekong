@@ -14,8 +14,10 @@ import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doodlekong.R
+import com.example.doodlekong.adapters.ChatMessageAdapter
 import com.example.doodlekong.data.remote.ws.models.DrawAction
 import com.example.doodlekong.data.remote.ws.models.GameError
 import com.example.doodlekong.data.remote.ws.models.JoinRoomHandshake
@@ -42,6 +44,8 @@ class DrawingActivity: AppCompatActivity() {
     private lateinit var toggle: ActionBarDrawerToggle
     private lateinit var rvPlayers: RecyclerView
 
+    private lateinit var chatMessageAdapter: ChatMessageAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDrawingBinding.inflate(layoutInflater)
@@ -49,6 +53,7 @@ class DrawingActivity: AppCompatActivity() {
         subscribeToUiStateUpdates()
         listenToConnectionEvents()
         listenToSocketEvents()
+        setupRecyclerView()
 
         toggle = ActionBarDrawerToggle(this, binding.root, R.string.open, R.string.close)
         toggle.syncState()
@@ -178,6 +183,12 @@ class DrawingActivity: AppCompatActivity() {
                 else -> Unit
             }
         }
+    }
+
+    private fun setupRecyclerView() = binding.rvChat.apply {
+        chatMessageAdapter = ChatMessageAdapter(args.username)
+        adapter = chatMessageAdapter
+        layoutManager = LinearLayoutManager(this@DrawingActivity)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
