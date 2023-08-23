@@ -21,9 +21,12 @@ import com.example.doodlekong.data.remote.ws.models.PlayerData
 import com.example.doodlekong.data.remote.ws.models.PlayersList
 import com.example.doodlekong.data.remote.ws.models.RoundDrawInfo
 import com.example.doodlekong.ui.views.DrawingView
+import com.example.doodlekong.util.Constants.TYPE_DRAW_ACTION
+import com.example.doodlekong.util.Constants.TYPE_DRAW_DATA
 import com.example.doodlekong.util.CoroutineTimer
 import com.example.doodlekong.util.DispatcherProvider
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 import com.tinder.scarlet.WebSocket
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -52,7 +55,7 @@ class DrawingViewModel @Inject constructor(
         data class NewWordsEvent(val data: NewWords): SocketEvent()
         data class ChosenWordEvent(val data: ChosenWord): SocketEvent()
         data class GameErrorEvent(val data: GameError): SocketEvent()
-        data class RoundDrawInfoEvent(val data: RoundDrawInfo): SocketEvent()
+        data class RoundDrawInfoEvent(val data: List<BaseModel>): SocketEvent()
         object UndoEvent: SocketEvent()
     }
 
@@ -147,6 +150,19 @@ class DrawingViewModel @Inject constructor(
                     }
                     is ChosenWord -> {
                         socketEventChannel.send(SocketEvent.ChosenWordEvent(data))
+                    }
+                    is RoundDrawInfo -> {
+                        val drawActions = mutableListOf<BaseModel>()
+                        data.data.forEach { drawAction ->
+                            val jsonObject = JsonParser.parseString(drawAction).asJsonObject
+                            val type = when(jsonObject.get("type").asString) {
+                                TYPE_DRAW_DATA -> DrawData::class.java
+                                TYPE_DRAW_ACTION -> DrawAction::class.java
+                                else -> BaseModel::class.java
+                            }
+                            drawActions.add(gson.fromJson(drawAction, type))
+                        }
+                        socketEventChannel.send(SocketEvent.RoundDrawInfoEvent(drawActions))
                     }
                     is Announcement -> {
                         socketEventChannel.send(SocketEvent.AnnouncementEvent(data))

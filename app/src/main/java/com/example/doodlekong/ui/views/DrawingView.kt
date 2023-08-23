@@ -13,6 +13,9 @@ import android.view.MotionEvent.ACTION_DOWN
 import android.view.MotionEvent.ACTION_MOVE
 import android.view.MotionEvent.ACTION_UP
 import android.view.View
+import com.example.doodlekong.data.remote.ws.models.BaseModel
+import com.example.doodlekong.data.remote.ws.models.DrawAction
+import com.example.doodlekong.data.remote.ws.models.DrawAction.Companion.ACTION_UNDO
 import com.example.doodlekong.data.remote.ws.models.DrawData
 import com.example.doodlekong.util.Constants
 import java.util.Stack
@@ -62,6 +65,25 @@ class DrawingView @JvmOverloads constructor(
 
     fun setPathDataChangedListener(listener: (Stack<PathData>) -> Unit) {
         pathDataChangedListener = listener
+    }
+
+    fun update(drawActions: List<BaseModel>) {
+        drawActions.forEach { drawAction ->
+            when(drawAction) {
+                is DrawData -> {
+                    when(drawAction.motionEvent) {
+                        ACTION_DOWN -> startedTouchExternally(drawAction)
+                        ACTION_MOVE -> movedTouchExternally(drawAction)
+                        ACTION_UP -> releasedTouchExternally(drawAction)
+                    }
+                }
+                is DrawAction -> {
+                    when(drawAction.action) {
+                        ACTION_UNDO -> undo()
+                    }
+                }
+            }
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
