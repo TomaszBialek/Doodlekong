@@ -31,6 +31,7 @@ import com.example.doodlekong.data.remote.ws.models.GameError
 import com.example.doodlekong.data.remote.ws.models.JoinRoomHandshake
 import com.example.doodlekong.data.remote.ws.models.PlayerData
 import com.example.doodlekong.databinding.ActivityDrawingBinding
+import com.example.doodlekong.ui.dialogs.LeaveDialog
 import com.example.doodlekong.util.Constants
 import com.example.doodlekong.util.hideKeyboard
 import com.google.android.material.snackbar.Snackbar
@@ -407,5 +408,14 @@ class DrawingActivity: AppCompatActivity(), LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     private fun onAppInBackground() {
         viewModel.disconnect()
+    }
+
+    override fun onBackPressed() {
+        LeaveDialog().apply {
+            setPositiveClickListener {
+                viewModel.disconnect()
+                finish()
+            }
+        }.show(supportFragmentManager, null)
     }
 }
