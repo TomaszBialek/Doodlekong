@@ -9,6 +9,7 @@ import com.example.doodlekong.data.remote.ws.models.Announcement
 import com.example.doodlekong.data.remote.ws.models.BaseModel
 import com.example.doodlekong.data.remote.ws.models.ChatMessage
 import com.example.doodlekong.data.remote.ws.models.ChosenWord
+import com.example.doodlekong.data.remote.ws.models.DisconnectRequest
 import com.example.doodlekong.data.remote.ws.models.DrawAction
 import com.example.doodlekong.data.remote.ws.models.DrawAction.Companion.ACTION_UNDO
 import com.example.doodlekong.data.remote.ws.models.DrawData
@@ -199,6 +200,10 @@ class DrawingViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun disconnect() {
+        sendBaseModel(DisconnectRequest())
     }
 
     fun chooseWord(word: String, roomName: String) {

@@ -12,6 +12,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,7 +42,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class DrawingActivity: AppCompatActivity() {
+class DrawingActivity: AppCompatActivity(), LifecycleObserver {
 
     private lateinit var binding: ActivityDrawingBinding
 
@@ -63,6 +67,7 @@ class DrawingActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDrawingBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         subscribeToUiStateUpdates()
         listenToConnectionEvents()
         listenToSocketEvents()
@@ -397,5 +402,10 @@ class DrawingActivity: AppCompatActivity() {
             return true
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    private fun onAppInBackground() {
+        viewModel.disconnect()
     }
 }
