@@ -25,6 +25,7 @@ import com.example.doodlekong.data.remote.ws.models.ChatMessage
 import com.example.doodlekong.data.remote.ws.models.DrawAction
 import com.example.doodlekong.data.remote.ws.models.GameError
 import com.example.doodlekong.data.remote.ws.models.JoinRoomHandshake
+import com.example.doodlekong.data.remote.ws.models.PlayerData
 import com.example.doodlekong.databinding.ActivityDrawingBinding
 import com.example.doodlekong.util.Constants
 import com.example.doodlekong.util.hideKeyboard
@@ -51,11 +52,12 @@ class DrawingActivity: AppCompatActivity() {
     private lateinit var toggle: ActionBarDrawerToggle
     private lateinit var rvPlayers: RecyclerView
     @Inject
-    private lateinit var playerAdapter: PlayerAdapter
+    lateinit var playerAdapter: PlayerAdapter
 
     private lateinit var chatMessageAdapter: ChatMessageAdapter
 
     private var updateChatJob: Job? = null
+    private var updatePlayersJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -220,6 +222,12 @@ class DrawingActivity: AppCompatActivity() {
         }
 
         lifecycleScope.launchWhenStarted {
+            viewModel.players.collect { players ->
+                updatePlayersList(players)
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
             viewModel.phaseTime.collect { time ->
                 binding.roundTimerProgressBar.progress = time.toInt()
                 binding.tvRemainingTimeChooseWord.text = (time / 1000L).toString()
@@ -350,6 +358,13 @@ class DrawingActivity: AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         binding.rvChat.layoutManager?.onSaveInstanceState()
+    }
+
+    private fun updatePlayersList(players: List<PlayerData>) {
+        updatePlayersJob?.cancel()
+        updatePlayersJob = lifecycleScope.launch {
+            playerAdapter.updateDataset(players)
+        }
     }
 
     private fun updateChatMessageList(chat: List<BaseModel>) {

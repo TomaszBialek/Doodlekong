@@ -17,6 +17,8 @@ import com.example.doodlekong.data.remote.ws.models.GameState
 import com.example.doodlekong.data.remote.ws.models.NewWords
 import com.example.doodlekong.data.remote.ws.models.PhaseChange
 import com.example.doodlekong.data.remote.ws.models.Ping
+import com.example.doodlekong.data.remote.ws.models.PlayerData
+import com.example.doodlekong.data.remote.ws.models.PlayersList
 import com.example.doodlekong.data.remote.ws.models.RoundDrawInfo
 import com.example.doodlekong.ui.views.DrawingView
 import com.example.doodlekong.util.CoroutineTimer
@@ -56,6 +58,9 @@ class DrawingViewModel @Inject constructor(
 
     private val _pathData = MutableStateFlow(Stack<DrawingView.PathData>())
     val pathData: StateFlow<Stack<DrawingView.PathData>> = _pathData
+
+    private val _players = MutableStateFlow<List<PlayerData>>(listOf())
+    val players: StateFlow<List<PlayerData>> = _players
 
     private val _newWords = MutableStateFlow(NewWords(listOf()))
     val newWords: StateFlow<NewWords> = _newWords
@@ -149,6 +154,9 @@ class DrawingViewModel @Inject constructor(
                     is GameState -> {
                         _gameState.value = data
                         socketEventChannel.send(SocketEvent.GameStateEvent(data))
+                    }
+                    is PlayersList -> {
+                        _players.value = data.players
                     }
                     is NewWords -> {
                         _newWords.value = data
